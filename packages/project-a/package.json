@@ -1,0 +1,47 @@
+{
+	"name": "project-a",
+	"version": "1.0.0",
+	"type": "module",
+	"exports": {
+		"./components": {
+			"types": "./dist/index.d.ts",
+			"import": "./dist/index.js"
+		},
+		"./theme.css": {
+			"import": "./dist/theme/theme.css"
+		},
+		"./global.css": {
+			"import": "./dist/theme/global.css"
+		},
+		"./tailwind.config.ts": {
+			"import": "./dist/tailwind.config.d.ts"
+		}
+	},
+	"types": "./dist/index.d.ts",
+	"files": ["dist"],
+	"scripts": {
+		"build": "rslib build",
+		"check": "biome check --write",
+		"dev": "rslib build --watch",
+		"format": "biome format --write"
+	},
+	"dependencies": {
+		"classnames": "^2.5.1"
+	},
+	"devDependencies": {
+		"@biomejs/biome": "2.0.0",
+		"@rsbuild/plugin-react": "^1.3.2",
+		"@rslib/core": "^0.10.4",
+		"@tailwindcss/postcss": "^4.0.4",
+		"@types/node": "^24.0.7",
+		"@types/react": "^19.1.8",
+		"react": "^19.1.0",
+		"tailwindcss": "^4.0.0",
+		"typescript": "^5.8.3"
+	},
+	"peerDependencies": {
+		"react": ">=16.9.0",
+		"react-dom": ">=16.9.0"
+	},
+	"private": true
+}
