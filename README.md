@@ -1,67 +1,117 @@
-# poc-tailwind-rslib-issue
+# `poc-tailwind-rslib-issue`
 
-This repo intent is to recreate a scenario where tailwind does not build classes
-properly (intentionally), unless said classes were cast into a
-element/component.
+A minimal reproduction repository to demonstrate an issue with Tailwind CSS (V4) compilation and `@theme static` within a library context.
 
-Furthermore, tailwind does that intentionally in order to make the build files
-as small as possible, however, I do not intent to minify them, on top of that
-the directive `static` on `@theme` in the `theme.css` is known for FORCING
-tailwind to generate utilities regardless if they were used or not, which does
-not look like working either.
+## 🎯 Project Goal
+
+This repository aims to simulate a scenario where Tailwind CSS, despite using the `@theme static` directive, fails to generate utilities for custom theme variables unless those variables are explicitly "used" within the same project.
+
+Tailwind's default behavior is to generate only used utilities for optimal bundle size. However, the `@theme static` directive is intended to override this, forcing the generation of all specified utilities regardless of usage. This behavior does not appear to be working as expected when a library (`project-a`) defines custom theme variables that are consumed by another project (`project-b`).
 
 
-# Current solution
+## 💡 The Problem
 
-The project has a workaround implemented, which is not adding `postcss` in project-a and leaving it to `project-b`, therefore the utilities are generated there sucessfuly.
-To roll back to the scenario where it's broken, simply add `"@tailwind/postcss": "^4.0.4"` and copy the postcss config file from `project-b` to `project-a`.
+`project-a` defines custom CSS variables within its Tailwind theme using `@theme static`. The intention is for `project-b` to consume these variables as Tailwind utilities.
 
- The result (❌) broken should be: Last 4 buttons in the `project-b | App.tsx` with white background.
+However, only the custom variables that are *actually used* within `project-a`'s codebase are compiled into utilities in `project-a`'s `dist` output. The unused, but `@theme static`-defined, variables do not generate corresponding utilities, making them unavailable for `project-b`.
 
-The result (✅) with workaround should be: Last 4 buttons in the `project-b | App.tsx` with their custom colors as background.
+This creates a challenge when `project-b` needs to utilize the full set of custom colors defined in `project-a`'s theme.
 
-# My goal
 
-Either force tailwind to build them or find a workaround where I can use the
-classes from `project-a` in `project-b`.
+## 🛠️ Current Workaround
 
-# How to find out if it is working?
+A temporary workaround has been implemented in this repository:
 
-You need to setup like this:
+The `postcss` processing step is **removed from `project-a`** and is instead **handled solely by `project-b`**. This allows `project-b` to correctly process all custom variables defined in `project-a`'s theme, even if they weren't explicitly used in `project-a`.
 
-- Add a variable group (color-blue-1, color-blue-2, color-blue-3) color in
-  theme.css
-- Use a few of said variables as a utility (aka
-  "text-${variable}" or "bg-${variable}" in a element)
-- Said variables should be used more in `project-b` than `project-a`, because
-  the core issue relies on tailwind only building utilities when you use them in
-  your project (the idea is to not use them, still build, so they can be used in
-  the `project-b`)
+### How to Observe the Issue (Broken State ❌)
 
-Then to test if it worked:
+To revert to the broken scenario where utilities are not generated:
 
-- Build the `project-a`
-- Check the build files in dist and double check if the varaibles AND the
-  utilities were created, should look like the following (in
-  `dist/theme/theme.css`):
-  ```
-  /* variables bellow */
-  @layer theme {
-    :root, :host {
-      ...
-      --color-custom-blue-10: #eaeeee;
-      ...
-    }
-  }
+1.  In `project-a`, add the dependency: `"@tailwind/postcss": "^4.0.4"` to its `package.json`.
+2.  Copy the `postcss.config.js` file from `project-b`'s root directory into `project-a`'s root directory.
 
-  /* utilities bellow */
-  @layer utilities {
-    ...
-    .bg-custom-blue-10 {
-      background-color: var(--color-custom-blue-10);
-    }
-    ...
-  }
-  ```
-- Final check is running `pnpm build` in `project-a`, then `pnpm i; pnpm dev` in
-  `project-b` and visually check if said classes are working in the UI.
+After these changes, rebuild `project-a` and run `project-b`. You should observe:
+
+  * **❌ Broken State:** The last 4 buttons in `project-b`'s `App.tsx` will have a **white background**.
+
+### How to Observe the Workaround (Working State ✅)
+
+The repository is set up by default to demonstrate the workaround:
+
+  * **✅ Working State:** The last 4 buttons in `project-b`'s `App.tsx` will display their **intended custom background colors**.
+
+
+## 🎯 My Goal
+
+My primary objectives are:
+
+1.  **Force Tailwind to build all `@theme static` utilities**: Find a configuration or method that ensures all variables defined under `@theme static` in `project-a` are compiled into utilities, regardless of their usage within `project-a` itself.
+2.  **Enable seamless consumption in `project-b`**: Discover a robust way for `project-b` to utilize these utilities from `project-a`'s `dist` output.
+
+
+## 🕵️ How to Verify Functionality
+
+To understand and test the behavior:
+
+1.  **Define Custom Variables:**
+
+      * In `project-a/theme/theme.css`, add a new group of variables, e.g., `--color-custom-blue-10`, `--color-custom-blue-25`, etc.
+      * **Crucially, use only a *few* of these variables as utilities** (e.g., `text-custom-blue-10` or `bg-custom-blue-25`) within `project-a`'s components. The core issue relies on Tailwind *not* building utilities unless you explicitly use them in the defining project. The goal is for them to *still build* so they can be used in `project-b`.
+
+2.  **Build `project-a`:**
+
+    ```bash
+    cd project-a
+    pnpm build
+    ```
+
+3.  **Inspect `project-a`'s Build Output:**
+
+      * Check `project-a/dist/theme/theme.css`.
+
+      * **Verify if both the variables AND their corresponding Tailwind utilities were generated.**
+
+          * You should see something similar to:
+
+        <!-- end list -->
+
+        ```css
+        /* Variables */
+        @layer theme {
+          :root, :host {
+            /* ... other variables ... */
+            --color-custom-blue-10: #eaeeee; /* Expected: new custom variable */
+            /* ... more custom variables ... */
+          }
+        }
+
+        /* Utilities */
+        @layer utilities {
+          /* ... other utilities ... */
+          .bg-custom-blue-10 { /* Expected: corresponding utility for custom variable */
+            background-color: var(--color-custom-blue-10);
+          }
+          /* ... more custom utilities ... */
+        }
+        ```
+
+4.  **Run `project-b` and Visual Check:**
+
+    ```bash
+    cd project-b
+    pnpm install # or pnpm i
+    pnpm dev
+    ```
+
+      * Open `project-b` in your browser.
+      * Visually confirm if the new custom classes (e.g., `bg-custom-blue-XX`) are correctly applying styles in the UI.
+
+-----
+
+## 🔬 Things I've Tried
+
+  * **Removing `static` from `@theme`**: Tested to see if the `static` keyword was causing an issue, but it did not resolve the problem.
+  * **Removing PostCSS from `project-a`**: This is the current workaround that successfully allows utilities to be generated correctly in `project-b`.
+  * **Setting up different configurations in `RSLib`, `RSBuild`, or alternative CSS import methods**: Explored various build configuration adjustments within `RSLib` and `RSBuild`, as well as different approaches to importing CSS files, but none yielded the desired outcome.
+  * **Testing different variable names**: Considered potential naming conflicts or reserved namespaces and experimented with alternative variable naming conventions, but the core issue persisted.
