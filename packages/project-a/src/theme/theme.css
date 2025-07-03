@@ -1,13 +1,13 @@
 @import "tailwindcss";
 
 @theme static {
-  --color-al-teal-10: #eaeeee;
-  --color-al-teal-25: #cad4d5;
-  --color-al-teal-75: #607d81;
-  --color-al-teal-100: #2b5257;
+	--color-al-teal-10: #eaeeee;
+	--color-al-teal-25: #cad4d5;
+	--color-al-teal-75: #607d81;
+	--color-al-teal-100: #2b5257;
 
-  --color-custom-teal-10: #eaeeee;
-  --color-custom-teal-25: #cad4d5;
-  --color-custom-teal-75: #607d81;
-  --color-custom-teal-100: #2b5257;
+	--color-custom-teal-10: #eaeeee;
+	--color-custom-teal-25: #cad4d5;
+	--color-custom-teal-75: #607d81;
+	--color-custom-teal-100: #2b5257;
 }

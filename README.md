@@ -10,6 +10,16 @@ the directive `static` on `@theme` in the `theme.css` is known for FORCING
 tailwind to generate utilities regardless if they were used or not, which does
 not look like working either.
 
+
+# Current solution
+
+The project has a workaround implemented, which is not adding `postcss` in project-a and leaving it to `project-b`, therefore the utilities are generated there sucessfuly.
+To roll back to the scenario where it's broken, simply add `"@tailwind/postcss": "^4.0.4"` and copy the postcss config file from `project-b` to `project-a`.
+
+ The result (❌) broken should be: Last 4 buttons in the `project-b | App.tsx` with white background.
+
+The result (✅) with workaround should be: Last 4 buttons in the `project-b | App.tsx` with their custom colors as background.
+
 # My goal
 
 Either force tailwind to build them or find a workaround where I can use the
