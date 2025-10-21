@@ -1,3 +1,3 @@
 @import "tailwindcss";
-@import "../node_modules/project-a/dist/theme/global.css";
+@import "../node_modules/project-a/src/theme/theme.css";
 @source "../node_modules/project-a/dist/**/*.{ts,tsx}";

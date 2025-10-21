@@ -34,7 +34,7 @@ importers:
         specifier: ^19.1.0
         version: 19.1.0
       tailwindcss:
-        specifier: ^4.0.0
+        specifier: 4.1.11
         version: 4.1.11
       typescript:
         specifier: ^5.8.3
