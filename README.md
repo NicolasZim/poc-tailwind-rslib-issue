@@ -2,6 +2,13 @@
 
 A minimal reproduction repository to demonstrate an issue with Tailwind CSS (V4) compilation and `@theme static` within a library context.
 
+## ✅ Goal achieved.
+
+Solution to this issue and the thread were it was discussed can be found at:
+https://github.com/tailwindlabs/tailwindcss/discussions/18440
+As suggested by
+https://github.com/wongjn
+
 ## 🎯 Project Goal
 
 This repository aims to simulate a scenario where Tailwind CSS, despite using the `@theme static` directive, fails to generate utilities for custom theme variables unless those variables are explicitly "used" within the same project.
