@@ -19,7 +19,8 @@
 	},
 	"types": "./dist/index.d.ts",
 	"files": [
-		"dist"
+		"dist",
+		"src/theme/theme.css"
 	],
 	"scripts": {
 		"build": "rslib build",
@@ -37,7 +38,7 @@
 		"@types/node": "^24.0.7",
 		"@types/react": "^19.1.8",
 		"react": "^19.1.0",
-		"tailwindcss": "^4.0.0",
+		"tailwindcss": "4.1.11",
 		"typescript": "^5.8.3"
 	},
 	"peerDependencies": {
